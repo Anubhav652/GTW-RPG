@@ -205,6 +205,16 @@ function setWl(plr, level, violent_time, reason, add_to, reduce_health)
 	update_graphical(plr)
 end
 
+--[[ Allow staff to set wanted level ]]--
+function admin_wanted_level(admin, cmd, plr, wl)
+	plr = getPlayerFromName(plr)
+	if not plr or not isElement(plr) or getElementType(plr) ~= "player" or not wl then return end
+	local is_staff = exports.GTWstaff:isStaff(admin)
+	if not is_staff then return end
+	setWl(plr, wl, 0, "APB set by police chief", true, false)
+end
+addCommandHandler("setwl", admin_wanted_level)
+
 function setServerWantedLevel(wl, violent_time, reason, require_nearby_cop, reduce_health)
 	-- A value indicating if the crime require a cop to be nearby
 	if require_nearby_cop then
@@ -243,6 +253,7 @@ end
 --[[ Crime of damage other players ]]--
 function crime_damage(attacker, attackerweapon, bodypart, loss)
 	if not attacker or not isElement(attacker) or getElementType(attacker) ~= "player" or attacker == source then return end
+	if getElementData(source, "GTWoutlaws.vBot") then return end
 	local wl,viol = getWl(source)
 	local is_jailed = exports.GTWjail:isJailed(source)
 	if is_law_unit(attacker) and (wl > 0 or getElementType(source) == "ped" or is_jailed) then return end
@@ -253,6 +264,7 @@ addEventHandler("onPlayerDamage", root, crime_damage)
 --[[ Crime of killing other players ]]--
 function crime_death(totalAmmo, killer, killerWeapon, bodypart, stealth)
 	if not killer or not isElement(killer) or getElementType(killer) ~= "player" or killer == source then return end
+	if getElementData(source, "GTWoutlaws.vBot") then return end
 	local wl,viol = getWl(source)
 	local is_jailed = exports.GTWjail:isJailed(source)
 
